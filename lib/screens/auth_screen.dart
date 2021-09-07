@@ -1,4 +1,5 @@
 import 'package:chat_app/widgets/Auth_form.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
@@ -26,6 +27,13 @@ class _AuthScreenState extends State<AuthScreen> {
             email: email,
             password: password
         );
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(authResult.user!.uid)
+            .set({
+          'text': username,
+          'password' : password
+        });
       }
 
     } on FirebaseAuthException catch (e) {
@@ -40,7 +48,7 @@ class _AuthScreenState extends State<AuthScreen> {
       } else if (e.code == 'wrong-password') {
         message = 'Wrong password provided for that user.';
       }
-      Scaffold.of(ctx).showSnackBar(SnackBar(
+      ScaffoldMessenger.of(ctx).showSnackBar(SnackBar(
           content: Text(message),
         backgroundColor: Theme.of(ctx).errorColor,
       ));

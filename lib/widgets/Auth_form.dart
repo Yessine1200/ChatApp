@@ -17,7 +17,7 @@ class _AuthFormState extends State<AuthForm> {
   String _username = "";
 
   void _submit() {
-    final isValid = _formKey.currentState!.validate();
+    final isValid = (_formKey.currentState!.validate());
     FocusScope.of(context).unfocus();
 
     if (isValid) {
@@ -41,12 +41,16 @@ class _AuthFormState extends State<AuthForm> {
                 TextFormField(
                   key: ValueKey('email'),
                   validator: (val) {
-                    if (val!.isEmpty || val.contains('@')) {
+                    if ((val!.isEmpty)) {
                       return "Please enter a valid email address";
                     }
                     return null;
                   },
-                  onSaved: (val) => _email = val!,
+                  onChanged: (val) {
+                    setState(() {
+                      _email = val;
+                    });
+                  },
                   keyboardType: TextInputType.emailAddress,
                   decoration: InputDecoration(labelText: "Email Address"),
                 ),
@@ -59,23 +63,31 @@ class _AuthFormState extends State<AuthForm> {
                       }
                       return null;
                     },
-                    onSaved: (val) => _username = val!,
+                    onChanged: (val) {
+                      setState(() {
+                        _username = val;
+                      });
+                    },
                     decoration: InputDecoration(labelText: "Username"),
                   ),
                 TextFormField(
                   key: ValueKey('password'),
                   validator: (val) {
-                    if (val!.isEmpty || val.length < 7) {
+                    if (val!.isEmpty || (val.length < 7)) {
                       return "Password must be at least 7 characters";
                     }
                     return null;
                   },
-                  onSaved: (val) => _password = val!,
+                  onChanged: (val){
+                    setState(() {
+                      _password = val;
+                    });
+                  },
                   decoration: InputDecoration(labelText: "Password"),
                   obscureText: true,
                 ),
                 SizedBox(height: 12,),
-                RaisedButton(
+                ElevatedButton(
                     child: Text(_isLogin ? 'Login': 'Sign Up'),
                     onPressed: _submit,
                     ),
