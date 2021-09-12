@@ -1,9 +1,13 @@
+import 'dart:io';
+
+import 'package:chat_app/widgets/pickers/user_image_picker.dart';
 import 'package:flutter/material.dart';
 
 class AuthForm extends StatefulWidget {
-  final void Function(String email, String password, String username, bool isLogin, BuildContext ctx) function;
+  final void Function(String email, String password, String username,File image, bool isLogin, BuildContext ctx) function;
+  final bool isLoading;
 
-  AuthForm(this.function);
+  AuthForm(this.function,this.isLoading);
 
   @override
   _AuthFormState createState() => _AuthFormState();
@@ -15,14 +19,28 @@ class _AuthFormState extends State<AuthForm> {
   String _email = "";
   String _password = "";
   String _username = "";
+  File _userImageFile;
+
+  void _pickedImage(File pickedImage) {
+      _userImageFile = pickedImage;
+  }
 
   void _submit() {
-    final isValid = (_formKey.currentState!.validate());
+    final isValid = (_formKey.currentState.validate());
     FocusScope.of(context).unfocus();
 
+
+    if(_userImageFile == null){
+      Scaffold.of(context).showSnackBar(SnackBar(
+        content: Text("Please pick an image"),
+        backgroundColor: Theme.of(context).errorColor,
+      ));
+      return;
+    }
+
     if (isValid) {
-      _formKey.currentState!.save();
-      widget.function(_email.trim(), _password.trim(), _username.trim(), _isLogin, context);
+      _formKey.currentState.save();
+      widget.function(_email.trim(), _password.trim(), _username.trim(), _userImageFile,_isLogin, context);
     }
   }
 
@@ -38,10 +56,11 @@ class _AuthFormState extends State<AuthForm> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
+                if (!_isLogin) UserImagePicker(_pickedImage),
                 TextFormField(
                   key: ValueKey('email'),
                   validator: (val) {
-                    if ((val!.isEmpty)) {
+                    if ((val.isEmpty) ) {
                       return "Please enter a valid email address";
                     }
                     return null;
@@ -58,7 +77,7 @@ class _AuthFormState extends State<AuthForm> {
                   TextFormField(
                     key: ValueKey('username'),
                     validator: (val) {
-                      if (val!.isEmpty || val.length < 4) {
+                      if (val.isEmpty || val.length < 4) {
                         return "Please enter at least 4 characters";
                       }
                       return null;
@@ -73,7 +92,7 @@ class _AuthFormState extends State<AuthForm> {
                 TextFormField(
                   key: ValueKey('password'),
                   validator: (val) {
-                    if (val!.isEmpty || (val.length < 7)) {
+                    if (val.isEmpty || (val.length < 7)) {
                       return "Password must be at least 7 characters";
                     }
                     return null;
@@ -87,10 +106,14 @@ class _AuthFormState extends State<AuthForm> {
                   obscureText: true,
                 ),
                 SizedBox(height: 12,),
+                if (widget.isLoading)
+                  CircularProgressIndicator(),
+                if (!widget.isLoading)
                 ElevatedButton(
                     child: Text(_isLogin ? 'Login': 'Sign Up'),
                     onPressed: _submit,
                     ),
+                if (!widget.isLoading)
                 FlatButton(
                   textColor: Theme.of(context).primaryColor,
                   child: Text(_isLogin

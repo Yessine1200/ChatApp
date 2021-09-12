@@ -1,3 +1,7 @@
+
+import 'package:chat_app/widgets/chat/message.dart';
+import 'package:chat_app/widgets/chat/new_message.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:core';
@@ -6,36 +10,36 @@ class ChatScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(),
-      body: StreamBuilder(
-        stream: FirebaseFirestore.instance.collection('chats/S8u1j1UkAHIQHkh817vI/messages').snapshots(),
-        builder: (ctx, snapShot){
-          if (snapShot.hasError) {
-            return Text('Something went wrong');
-          }
-          if (snapShot.connectionState == ConnectionState.waiting){
-            return CircularProgressIndicator();
-          }
-          /*final docs = snapShot.data!.doc() ;*/
-
-          return ListView.builder(
-            itemCount: 10,
-            itemBuilder: (ctx, index)=> Container(
-              padding: EdgeInsets.all(8),
-              child: Text(''),
-            )
-        );
-        },
-
+      appBar: AppBar(
+        title: Text('Flutter Chat'),
+        actions: [
+          DropdownButton(
+            icon:Icon(Icons.more_vert, color: Theme.of(context).primaryIconTheme.color,),
+            items: [
+              DropdownMenuItem(child: Row(children: [
+                Icon(Icons.exit_to_app),
+                SizedBox(width: 8,),
+                Text('Logout'),
+              ],),
+                value: 'logout',
+              )
+            ],
+            onChanged: (itemIdentifier){
+                if(itemIdentifier=='logout'){
+                  FirebaseAuth.instance.signOut();
+                }
+            },
+          )
+        ],
       ),
-      floatingActionButton: FloatingActionButton(
-        child: Icon(Icons.add),
-        onPressed: (){
-          FirebaseFirestore.instance
-              .collection('chats/S8u1j1UkAHIQHkh817vI/messages')
-              .add({'text': "Button text"});
-        },
-      ),
+      body:Container(
+        child:  Column(
+            children: [
+              Expanded(child: Messages()),
+              NewMessages()
+            ],
+          ),
+        ),
     );
   }
 }
